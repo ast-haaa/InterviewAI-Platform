@@ -3,7 +3,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDilKWyKioouAup4azjQrVw15HJWFxF158",
-  authDomain: "interview-ai-ff89b.firebaseapp.com",
+  authDomain: "interview-ai-ff89b.web.app",
   projectId: "interview-ai-ff89b",
   storageBucket: "interview-ai-ff89b.firebasestorage.app",
   messagingSenderId: "299758387647",
@@ -14,5 +14,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({
+  prompt: "select_account"
+});
 
 export { auth, provider };

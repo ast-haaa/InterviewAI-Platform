@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BsRobot } from "react-icons/bs";
 import { IoSparkles } from "react-icons/io5";
 import { motion } from "motion/react"
 import { FcGoogle } from "react-icons/fc";
-import { signInWithPopup, browserPopupRedirectResolver } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, getRedirectResult, browserPopupRedirectResolver } from 'firebase/auth';
 import { auth, provider } from '../utils/firebase';
 import axios from 'axios';
 import { ServerUrl } from '../App';
@@ -14,6 +14,29 @@ function Auth({isModel = false}) {
     const dispatch = useDispatch()
     const [authError, setAuthError] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
+
+    useEffect(() => {
+        // Handle redirect result if redirect login was used
+        getRedirectResult(auth).then(async (response) => {
+            if (response?.user) {
+                setIsLoading(true)
+                try {
+                    let User = response.user
+                    let name = User.displayName
+                    let email = User.email
+                    const result = await axios.post(ServerUrl + "/api/auth/google", { name, email }, { withCredentials: true })
+                    dispatch(setUserData(result.data))
+                } catch (backendErr) {
+                    console.error("Backend Auth Error:", backendErr)
+                    setAuthError(backendErr.response?.data?.message || `Failed to connect to backend server at ${ServerUrl}`)
+                } finally {
+                    setIsLoading(false)
+                }
+            }
+        }).catch((err) => {
+            console.error("Redirect result error:", err)
+        })
+    }, [dispatch])
 
     const handleGoogleAuth = async () => {
         setAuthError(null)
@@ -43,9 +66,21 @@ function Auth({isModel = false}) {
         } catch (backendErr) {
             console.error("Backend Auth Error:", backendErr)
             dispatch(setUserData(null))
-            setAuthError(backendErr.response?.data?.message || `Connected to Google, but failed to connect to backend server at ${ServerUrl}. Ensure server is running on port 8000.`)
+            setAuthError(backendErr.response?.data?.message || `Connected to Google, but failed to connect to backend server at ${ServerUrl}.`)
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const handleGoogleRedirectAuth = async () => {
+        setAuthError(null)
+        setIsLoading(true)
+        try {
+            await signInWithRedirect(auth, provider)
+        } catch (err) {
+            console.error("Redirect signin error:", err)
+            setIsLoading(false)
+            setAuthError(err.message)
         }
     }
 
@@ -91,6 +126,15 @@ function Auth({isModel = false}) {
                     <FcGoogle size={20}/>
                     {isLoading ? "Signing in..." : "Continue with Google"}
                 </motion.button>
+
+                <div className='text-center mt-3'>
+                    <button 
+                        type="button"
+                        onClick={handleGoogleRedirectAuth}
+                        className='text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 underline cursor-pointer'>
+                        Popup not working? Click here to sign in with redirect
+                    </button>
+                </div>
 
                 {authError && (
                     <div className='mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-xs md:text-sm text-center'>
