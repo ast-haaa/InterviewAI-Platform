@@ -1,5 +1,7 @@
-import React from 'react'
-import { motion } from "motion/react"
+import React, { useState } from 'react';
+import { motion } from "motion/react";
+import { useNavigate } from 'react-router-dom';
+import { BsRobot, BsArrowLeft } from "react-icons/bs";
 import {
     FaUserTie,
     FaBriefcase,
@@ -7,14 +9,15 @@ import {
     FaMicrophoneAlt,
     FaChartLine,
 } from "react-icons/fa";
-import { useState } from 'react';
-import axios from "axios"
+import axios from "axios";
 import { ServerUrl } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
+
 function Step1SetUp({ onStart }) {
-    const { userData } = useSelector((state) => state.user)
-    const dispatch = useDispatch()
+    const navigate = useNavigate();
+    const { userData } = useSelector((state) => state.user);
+    const dispatch = useDispatch();
     const [role, setRole] = useState("");
     const [experience, setExperience] = useState("");
     const [mode, setMode] = useState("Technical");
@@ -87,6 +90,28 @@ function Step1SetUp({ onStart }) {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.7 }}
                     className='relative bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-900 dark:to-gray-800 p-12 flex flex-col justify-center'>
+
+                    <div className='flex items-center justify-between mb-8'>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/')}
+                            className='flex items-center gap-2 cursor-pointer group text-left'>
+                            <div className='bg-black text-white p-2 rounded-lg group-hover:scale-105 transition'>
+                                <BsRobot size={18}/>
+                            </div>
+                            <span className='font-semibold text-lg text-gray-900 dark:text-gray-100 group-hover:text-green-600 transition'>
+                                InterviewIQ.AI
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate('/')}
+                            className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition cursor-pointer bg-white/70 dark:bg-gray-800/70 px-3 py-1.5 rounded-full shadow-sm border border-gray-200 dark:border-gray-700'>
+                            <BsArrowLeft size={15} />
+                            <span>Home</span>
+                        </button>
+                    </div>
 
                     <h2 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-6">
                         Start Your AI Interview
@@ -266,6 +291,7 @@ function Step1SetUp({ onStart }) {
                                 {startError}
                             </div>
                         )}
+
                     </div>
 
                 </motion.div>
