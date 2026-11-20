@@ -13,7 +13,7 @@ import { ServerUrl } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
 function Step1SetUp({ onStart }) {
-    const {userData}= useSelector((state)=>state.user)
+    const { userData } = useSelector((state) => state.user)
     const dispatch = useDispatch()
     const [role, setRole] = useState("");
     const [experience, setExperience] = useState("");
@@ -25,6 +25,7 @@ function Step1SetUp({ onStart }) {
     const [resumeText, setResumeText] = useState("");
     const [analysisDone, setAnalysisDone] = useState(false);
     const [analyzing, setAnalyzing] = useState(false);
+    const [startError, setStartError] = useState(null);
 
 
     const handleUploadResume = async () => {
@@ -55,18 +56,20 @@ function Step1SetUp({ onStart }) {
     }
 
     const handleStart = async () => {
+        setStartError(null)
         setLoading(true)
         try {
-           const result = await axios.post(ServerUrl + "/api/interview/generate-questions" , {role, experience, mode , resumeText, projects, skills } , {withCredentials:true}) 
-           console.log(result.data)
-           if(userData){
-            dispatch(setUserData({...userData , credits:result.data.creditsLeft}))
-           }
-           setLoading(false)
-           onStart(result.data)
+            const result = await axios.post(ServerUrl + "/api/interview/generate-questions", { role, experience, mode, resumeText, projects, skills }, { withCredentials: true })
+            console.log(result.data)
+            if (userData) {
+                dispatch(setUserData({ ...userData, credits: result.data.creditsLeft }))
+            }
+            setLoading(false)
+            onStart(result.data)
 
         } catch (error) {
             console.log(error)
+            setStartError(error.response?.data?.message || "Failed to start interview. Please try again.")
             setLoading(false)
         }
     }
@@ -250,15 +253,19 @@ function Step1SetUp({ onStart }) {
 
 
                         <motion.button
-                        onClick={handleStart}
+                            onClick={handleStart}
                             disabled={!role || !experience || loading}
                             whileHover={{ scale: 1.03 }}
                             whileTap={{ scale: 0.95 }}
-                            className='w-full disabled:bg-gray-600 bg-green-600 hover:bg-green-700 text-white py-3 rounded-full text-lg font-semibold transition duration-300 shadow-md'>
-                            {loading ? "Staring...":"Start Interview"}
-
-
+                            className='w-full disabled:bg-gray-600 bg-green-600 hover:bg-green-700 text-white py-3 rounded-full text-lg font-semibold transition duration-300 shadow-md cursor-pointer'>
+                            {loading ? "Starting..." : "Start Interview"}
                         </motion.button>
+
+                        {startError && (
+                            <div className='mt-3 p-3 bg-red-100 text-red-700 rounded-xl text-sm text-center'>
+                                {startError}
+                            </div>
+                        )}
                     </div>
 
                 </motion.div>
