@@ -3,7 +3,7 @@ import { BsRobot } from "react-icons/bs";
 import { IoSparkles } from "react-icons/io5";
 import { motion } from "motion/react"
 import { FcGoogle } from "react-icons/fc";
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, browserPopupRedirectResolver } from 'firebase/auth';
 import { auth, provider } from '../utils/firebase';
 import axios from 'axios';
 import { ServerUrl } from '../App';
@@ -21,13 +21,17 @@ function Auth({isModel = false}) {
 
         let User;
         try {
-            const response = await signInWithPopup(auth, provider)
+            const response = await signInWithPopup(auth, provider, browserPopupRedirectResolver)
             User = response.user
         } catch (firebaseErr) {
             console.error("Firebase Auth Error:", firebaseErr)
             setIsLoading(false)
             dispatch(setUserData(null))
-            setAuthError(`Firebase Error: ${firebaseErr.code || firebaseErr.message}`)
+            if (firebaseErr.code === 'auth/popup-closed-by-user') {
+                setAuthError("Sign-in popup was closed before completing login. Please try again.")
+            } else {
+                setAuthError(`Firebase Error: ${firebaseErr.code || firebaseErr.message}`)
+            }
             return
         }
 
