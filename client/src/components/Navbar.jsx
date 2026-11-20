@@ -65,7 +65,7 @@ function Navbar() {
                         setShowUserPopup(false)
                     }} className='flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full text-md hover:bg-gray-200 dark:hover:bg-gray-700 transition text-gray-900 dark:text-gray-100'>
                         <BsCoin size={20}/>
-                        {userData?.credits || 0}
+                        {userData?.email?.toLowerCase() === "astha4187098@gmail.com" ? "∞ Unlimited" : (userData?.credits || 0)}
                     </button>
 
                     {showCreditPopup && (

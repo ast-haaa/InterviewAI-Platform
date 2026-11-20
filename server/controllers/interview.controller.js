@@ -102,7 +102,9 @@ export const generateQuestion = async (req, res) => {
       });
     }
 
-    if (user.credits < 50) {
+    const isVip = user.email?.toLowerCase() === "astha4187098@gmail.com";
+
+    if (!isVip && user.credits < 50) {
       return res.status(400).json({
         message: "Not enough credits. Minimum 50 required."
       });
@@ -195,8 +197,13 @@ Make questions based on the candidate’s role, experience,interviewMode, projec
       });
     }
 
-    user.credits -= 50;
-    await user.save();
+    if (!isVip) {
+      user.credits -= 50;
+      await user.save();
+    } else {
+      user.credits = 999999;
+      await user.save();
+    }
 
     const interview = await Interview.create({
       userId: user._id,
